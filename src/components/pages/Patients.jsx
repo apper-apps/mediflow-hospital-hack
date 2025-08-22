@@ -14,11 +14,15 @@ import Empty from "@/components/ui/Empty";
 import patientService from "@/services/api/patientService";
 
 const Patients = () => {
-  const [patients, setPatients] = useState([]);
+const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingPatient, setEditingPatient] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     age: "",
@@ -46,6 +50,55 @@ const Patients = () => {
     { value: "discharged", label: "Discharged" },
     { value: "emergency", label: "Emergency" }
   ];
+const handleEdit = (patient) => {
+    setEditingPatient(patient);
+    setFormData({
+      name: patient.Name || "",
+      age: patient.age_c?.toString() || "",
+      gender: patient.gender_c || "",
+      phone: patient.phone_c || "",
+      emergencyContact: patient.emergency_contact_c || "",
+      bloodGroup: patient.blood_group_c || "",
+      allergies: patient.allergies_c || "",
+      currentDepartment: patient.current_department_c || "",
+      status: patient.status_c || "waiting"
+    });
+    setShowEditForm(true);
+    setDropdownOpen(null);
+  };
+
+  const handleCloseForm = () => {
+    setShowAddForm(false);
+    setShowEditForm(false);
+    setEditingPatient(null);
+    setFormData({
+      name: "",
+      age: "",
+      gender: "",
+      phone: "",
+      emergencyContact: "",
+      bloodGroup: "",
+      allergies: "",
+      currentDepartment: "",
+      status: "waiting"
+    });
+  };
+
+  const toggleDropdown = (patientId) => {
+    setDropdownOpen(dropdownOpen === patientId ? null : patientId);
+    setSelectedPatientId(patientId);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setDropdownOpen(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const loadPatients = async () => {
     try {
@@ -82,10 +135,10 @@ filtered = filtered.filter(patient =>
     setFilteredPatients(filtered);
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-const patientData = {
+      const patientData = {
         Name: formData.name,
         age_c: parseInt(formData.age),
         gender_c: formData.gender,
@@ -95,27 +148,29 @@ const patientData = {
         allergies_c: formData.allergies,
         current_department_c: formData.currentDepartment,
         status_c: formData.status,
-        admission_date_c: new Date().toISOString()
+        admission_date_c: editingPatient ? editingPatient.admission_date_c : new Date().toISOString()
       };
 
-      const newPatient = await patientService.create(patientData);
-      setPatients(prev => [newPatient, ...prev]);
-      setFilteredPatients(prev => [newPatient, ...prev]);
-      setShowAddForm(false);
-      setFormData({
-        name: "",
-        age: "",
-        gender: "",
-        phone: "",
-        emergencyContact: "",
-        bloodGroup: "",
-        allergies: "",
-        currentDepartment: "",
-        status: "waiting"
-      });
-      toast.success("Patient registered successfully!");
+      if (editingPatient) {
+        // Update existing patient
+        const updatedPatient = await patientService.update(editingPatient.Id, patientData);
+        const updatedPatients = patients.map(p => 
+          p.Id === editingPatient.Id ? updatedPatient : p
+        );
+        setPatients(updatedPatients);
+        setFilteredPatients(updatedPatients);
+        toast.success("Patient updated successfully!");
+      } else {
+        // Create new patient
+        const newPatient = await patientService.create(patientData);
+        setPatients(prev => [newPatient, ...prev]);
+        setFilteredPatients(prev => [newPatient, ...prev]);
+        toast.success("Patient registered successfully!");
+      }
+      
+      handleCloseForm();
     } catch (err) {
-      toast.error("Failed to register patient");
+      toast.error(editingPatient ? "Failed to update patient" : "Failed to register patient");
     }
   };
 
@@ -170,7 +225,7 @@ const patient = patients.find(p => p.Id === patientId);
       </Card>
 
       {/* Add Patient Form */}
-      {showAddForm && (
+{(showAddForm || showEditForm) && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -180,8 +235,10 @@ const patient = patients.find(p => p.Id === patientId);
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-slate-900">Add New Patient</h3>
-                <Button variant="ghost" onClick={() => setShowAddForm(false)}>
+                <h3 className="text-xl font-semibold text-slate-900">
+                  {editingPatient ? 'Edit Patient' : 'Add New Patient'}
+                </h3>
+                <Button variant="ghost" onClick={handleCloseForm}>
                   <ApperIcon name="X" className="w-5 h-5" />
                 </Button>
               </div>
@@ -272,10 +329,10 @@ const patient = patients.find(p => p.Id === patientId);
                 </div>
 
                 <div className="flex gap-3 pt-4">
-                  <Button type="submit" variant="primary" className="flex-1">
-                    Register Patient
+<Button type="submit" variant="primary" className="flex-1">
+                    {editingPatient ? 'Update Patient' : 'Register Patient'}
                   </Button>
-                  <Button type="button" variant="ghost" onClick={() => setShowAddForm(false)}>
+                  <Button type="button" variant="ghost" onClick={handleCloseForm}>
                     Cancel
                   </Button>
                 </div>
@@ -367,9 +424,37 @@ onChange={(e) => handleStatusUpdate(patient.Id, e.target.value)}
                         <option key={option.value} value={option.value}>{option.label}</option>
                       ))}
                     </select>
-                    <Button variant="ghost" size="sm">
-                      <ApperIcon name="MoreVertical" className="w-4 h-4" />
-                    </Button>
+<div className="relative dropdown-container">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => toggleDropdown(patient.Id)}
+                      >
+                        <ApperIcon name="MoreVertical" className="w-4 h-4" />
+                      </Button>
+                      
+                      {dropdownOpen === patient.Id && (
+                        <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
+                          <button
+                            onClick={() => handleEdit(patient)}
+                            className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                          >
+                            <ApperIcon name="Edit" className="w-3 h-3" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Handle delete functionality here if needed
+                              setDropdownOpen(null);
+                            }}
+                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                          >
+                            <ApperIcon name="Trash2" className="w-3 h-3" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
