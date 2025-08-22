@@ -41,6 +41,7 @@ const Departments = () => {
   }, []);
 
 const getDepartmentPatients = (departmentName) => {
+    if (!departmentName) return [];
     return patients.filter(patient => patient.current_department_c === departmentName.toLowerCase());
   };
 
@@ -62,7 +63,8 @@ const patient = patients.find(p => p.Id === patientId);
     }
   };
 
-  const getDepartmentIcon = (departmentName) => {
+const getDepartmentIcon = (departmentName) => {
+    if (!departmentName) return "Building2";
     const icons = {
       emergency: "AlertTriangle",
       cardiology: "Heart",
@@ -74,7 +76,8 @@ const patient = patients.find(p => p.Id === patientId);
     return icons[departmentName.toLowerCase()] || "Building2";
   };
 
-  const getDepartmentColor = (departmentName) => {
+const getDepartmentColor = (departmentName) => {
+    if (!departmentName) return "primary";
     const colors = {
       emergency: "error",
       cardiology: "danger",
@@ -141,8 +144,8 @@ const patient = patients.find(p => p.Id === patientId);
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {departments.map((department, index) => {
-const departmentPatients = getDepartmentPatients(department.name);
+{departments.map((department, index) => {
+            const departmentPatients = getDepartmentPatients(department?.Name || department?.name);
             const waitingPatients = departmentPatients.filter(p => p.status_c === "waiting");
             const admittedPatients = departmentPatients.filter(p => p.status_c === "admitted");
             
@@ -157,15 +160,15 @@ const departmentPatients = getDepartmentPatients(department.name);
               >
                 <Card className={`p-6 transition-all duration-300 ${selectedDepartment === department.Id ? 'ring-2 ring-primary shadow-lg transform scale-[1.02]' : 'hover:shadow-lg hover:-translate-y-1'}`}>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-12 h-12 bg-gradient-to-br from-${getDepartmentColor(department.name)}/20 to-${getDepartmentColor(department.name)}/30 rounded-xl flex items-center justify-center`}>
+<div className="flex items-center space-x-3">
+                      <div className={`w-12 h-12 bg-gradient-to-br from-${getDepartmentColor(department?.Name || department?.name)}/20 to-${getDepartmentColor(department?.Name || department?.name)}/30 rounded-xl flex items-center justify-center`}>
                         <ApperIcon 
-                          name={getDepartmentIcon(department.name)} 
-                          className={`w-6 h-6 text-${getDepartmentColor(department.name)}`} 
+                          name={getDepartmentIcon(department?.Name || department?.name)} 
+                          className={`w-6 h-6 text-${getDepartmentColor(department?.Name || department?.name)}`} 
                         />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-slate-900 capitalize">{department.name}</h3>
+                        <h3 className="font-semibold text-slate-900 capitalize">{department?.Name || department?.name || 'Unknown'}</h3>
                         <p className="text-sm text-slate-500">Department</p>
                       </div>
                     </div>
@@ -190,11 +193,11 @@ const departmentPatients = getDepartmentPatients(department.name);
                   </div>
 
                   {/* Current Queue */}
-                  <div className="flex items-center justify-between mb-4">
+<div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-600">Current Queue</span>
                     <div className="flex items-center space-x-2">
-                      <div className={`w-2 h-2 rounded-full bg-${getDepartmentColor(department.name)}`}></div>
-                      <span className="text-lg font-bold text-slate-900">{department.currentQueue}</span>
+                      <div className={`w-2 h-2 rounded-full bg-${getDepartmentColor(department?.Name || department?.name)}`}></div>
+                      <span className="text-lg font-bold text-slate-900">{department?.current_queue_c || department?.currentQueue || 0}</span>
                     </div>
                   </div>
 
@@ -228,16 +231,19 @@ const departmentPatients = getDepartmentPatients(department.name);
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="p-6">
+<Card className="p-6">
             {(() => {
               const department = departments.find(d => d.Id === selectedDepartment);
-              const departmentPatients = getDepartmentPatients(department.name);
+              if (!department) return null;
+              
+              const departmentName = department?.Name || department?.name;
+              const departmentPatients = getDepartmentPatients(departmentName);
               
               return (
                 <>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold text-slate-900 capitalize">
-                      {department.name} - Patient Queue
+                      {departmentName || 'Unknown'} - Patient Queue
                     </h3>
                     <Button 
                       variant="ghost" 
@@ -251,7 +257,7 @@ const departmentPatients = getDepartmentPatients(department.name);
                     <Empty
                       icon="Users"
                       title="No patients in queue"
-                      description={`No patients are currently in the ${department.name} department.`}
+                      description={`No patients are currently in the ${departmentName || 'selected'} department.`}
                     />
                   ) : (
                     <div className="space-y-4">
