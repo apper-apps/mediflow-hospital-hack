@@ -76,7 +76,7 @@ filtered = filtered.filter(patient =>
     }
 
     if (filterValue) {
-      filtered = filtered.filter(patient => patient.currentDepartment === filterValue);
+      filtered = filtered.filter(patient => patient.current_department_c === filterValue);
     }
 
     setFilteredPatients(filtered);
@@ -310,47 +310,47 @@ key={patient.Id}
                       <ApperIcon name="User" className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900">{patient.name}</h3>
+<h3 className="font-semibold text-slate-900">{patient.Name}</h3>
 <p className="text-sm text-slate-500">ID: {patient.Id}</p>
                     </div>
                   </div>
-                  <StatusIndicator status={patient.status} size="sm" />
+                  <StatusIndicator status={patient.status_c} size="sm" />
                 </div>
 
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-slate-500">Age:</span>
-                      <span className="ml-2 font-medium text-slate-900">{patient.age}</span>
+                      <span className="ml-2 font-medium text-slate-900">{patient.age_c}</span>
                     </div>
                     <div>
                       <span className="text-slate-500">Gender:</span>
-                      <span className="ml-2 font-medium text-slate-900 capitalize">{patient.gender}</span>
+                      <span className="ml-2 font-medium text-slate-900 capitalize">{patient.gender_c}</span>
                     </div>
                     <div>
                       <span className="text-slate-500">Blood:</span>
-                      <span className="ml-2 font-medium text-slate-900">{patient.bloodGroup}</span>
+                      <span className="ml-2 font-medium text-slate-900">{patient.blood_group_c}</span>
                     </div>
                     <div>
                       <span className="text-slate-500">Phone:</span>
-                      <span className="ml-2 font-medium text-slate-900">{patient.phone}</span>
+                      <span className="ml-2 font-medium text-slate-900">{patient.phone_c}</span>
                     </div>
                   </div>
 
                   <div>
                     <span className="text-slate-500 text-sm">Department:</span>
                     <Badge variant="primary" size="sm" className="ml-2 capitalize">
-                      {patient.currentDepartment}
+                      {patient.current_department_c}
                     </Badge>
                   </div>
 
-                  {patient.allergies && patient.allergies.length > 0 && (
+{patient.allergies_c && patient.allergies_c.length > 0 && (
                     <div>
                       <span className="text-slate-500 text-sm">Allergies:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {patient.allergies.map((allergy, idx) => (
+                        {patient.allergies_c.split(',').map((allergy, idx) => (
                           <Badge key={idx} variant="warning" size="sm">
-                            {allergy}
+                            {allergy.trim()}
                           </Badge>
                         ))}
                       </div>
@@ -358,8 +358,8 @@ key={patient.Id}
                   )}
 
                   <div className="flex gap-2 pt-4">
-                    <select
-                      value={patient.status}
+<select
+                      value={patient.status_c}
 onChange={(e) => handleStatusUpdate(patient.Id, e.target.value)}
                       className="flex-1 h-8 px-2 py-1 bg-white border border-slate-300 rounded-md text-xs text-slate-900 focus:border-primary focus:outline-none"
                     >
