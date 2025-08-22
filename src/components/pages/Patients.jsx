@@ -174,7 +174,7 @@ const handleSubmit = async (e) => {
     }
   };
 
-  const handleStatusUpdate = async (patientId, newStatus) => {
+const handleStatusUpdate = async (patientId, newStatus) => {
     try {
 const patient = patients.find(p => p.Id === patientId);
       const updatedPatient = await patientService.update(patientId, { ...patient, status_c: newStatus });
@@ -187,6 +187,26 @@ const patient = patients.find(p => p.Id === patientId);
       toast.success(`Patient status updated to ${newStatus}`);
     } catch (err) {
       toast.error("Failed to update patient status");
+    }
+  };
+
+  const handleDelete = async (patientId) => {
+    try {
+      const patient = patients.find(p => p.Id === patientId);
+      const patientName = patient?.Name || 'this patient';
+      
+      if (confirm(`Are you sure you want to delete ${patientName}? This action cannot be undone.`)) {
+        const success = await patientService.delete(patientId);
+        
+        if (success) {
+          // Remove the deleted patient from both lists immediately
+          const updatedPatients = patients.filter(p => p.Id !== patientId);
+          setPatients(updatedPatients);
+          setFilteredPatients(updatedPatients);
+        }
+      }
+    } catch (err) {
+      toast.error("Failed to delete patient");
     }
   };
 
@@ -443,8 +463,8 @@ onChange={(e) => handleStatusUpdate(patient.Id, e.target.value)}
                             Edit
                           </button>
                           <button
-                            onClick={() => {
-                              // Handle delete functionality here if needed
+onClick={() => {
+                              handleDelete(patient.Id);
                               setDropdownOpen(null);
                             }}
                             className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
