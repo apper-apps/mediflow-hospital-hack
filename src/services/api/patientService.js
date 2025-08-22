@@ -102,7 +102,7 @@ class PatientService {
   async create(patientData) {
     try {
       // Only include Updateable fields in create operation
-      const updateableData = {
+const updateableData = {
         Name: patientData.Name || '',
         Tags: patientData.Tags || '',
         age_c: parseInt(patientData.age_c) || 0,
@@ -164,7 +164,7 @@ class PatientService {
 
   async update(id, patientData) {
     try {
-      // Only include Updateable fields in update operation
+// Only include Updateable fields in update operation
       const updateableData = {
         Id: parseInt(id),
         Name: patientData.Name,

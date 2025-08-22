@@ -69,9 +69,9 @@ const Patients = () => {
     let filtered = patients;
 
     if (searchTerm) {
-      filtered = filtered.filter(patient =>
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.id.toLowerCase().includes(searchTerm.toLowerCase())
+filtered = filtered.filter(patient =>
+        patient.Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.Id?.toString().toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -85,12 +85,17 @@ const Patients = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const patientData = {
-        ...formData,
-        age: parseInt(formData.age),
-        allergies: formData.allergies.split(",").map(a => a.trim()).filter(a => a),
-        admissionDate: new Date().toISOString(),
-        id: `PAT-${Date.now()}`
+const patientData = {
+        Name: formData.name,
+        age_c: parseInt(formData.age),
+        gender_c: formData.gender,
+        phone_c: formData.phone,
+        emergency_contact_c: formData.emergencyContact,
+        blood_group_c: formData.bloodGroup,
+        allergies_c: formData.allergies,
+        current_department_c: formData.currentDepartment,
+        status_c: formData.status,
+        admission_date_c: new Date().toISOString()
       };
 
       const newPatient = await patientService.create(patientData);
@@ -116,8 +121,8 @@ const Patients = () => {
 
   const handleStatusUpdate = async (patientId, newStatus) => {
     try {
-      const patient = patients.find(p => p.Id === patientId);
-      const updatedPatient = await patientService.update(patientId, { ...patient, status: newStatus });
+const patient = patients.find(p => p.Id === patientId);
+      const updatedPatient = await patientService.update(patientId, { ...patient, status_c: newStatus });
       
       const updatedPatients = patients.map(p => 
         p.Id === patientId ? updatedPatient : p
@@ -293,7 +298,7 @@ const Patients = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredPatients.map((patient, index) => (
             <motion.div
-              key={patient.Id}
+key={patient.Id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -306,7 +311,7 @@ const Patients = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-slate-900">{patient.name}</h3>
-                      <p className="text-sm text-slate-500">ID: {patient.id}</p>
+<p className="text-sm text-slate-500">ID: {patient.Id}</p>
                     </div>
                   </div>
                   <StatusIndicator status={patient.status} size="sm" />
@@ -355,7 +360,7 @@ const Patients = () => {
                   <div className="flex gap-2 pt-4">
                     <select
                       value={patient.status}
-                      onChange={(e) => handleStatusUpdate(patient.Id, e.target.value)}
+onChange={(e) => handleStatusUpdate(patient.Id, e.target.value)}
                       className="flex-1 h-8 px-2 py-1 bg-white border border-slate-300 rounded-md text-xs text-slate-900 focus:border-primary focus:outline-none"
                     >
                       {statusOptions.map(option => (

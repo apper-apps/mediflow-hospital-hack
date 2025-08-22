@@ -46,7 +46,7 @@ const Departments = () => {
 
   const movePatientToNextStage = async (patientId, currentDepartment) => {
     try {
-      const patient = patients.find(p => p.Id === patientId);
+const patient = patients.find(p => p.Id === patientId);
       if (!patient) return;
 
       const nextStatus = patient.status === "waiting" ? "admitted" : "discharged";
@@ -258,7 +258,7 @@ const Departments = () => {
                               </div>
                               <div>
                                 <p className="font-medium text-slate-900">{patient.name}</p>
-                                <p className="text-sm text-slate-500">ID: {patient.id} • Age: {patient.age}</p>
+<p className="text-sm text-slate-500">ID: {patient.Id} • Age: {patient.age_c}</p>
                               </div>
                             </div>
                           </div>
