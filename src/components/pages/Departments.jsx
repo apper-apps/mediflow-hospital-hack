@@ -105,12 +105,27 @@ const patient = patients.find(p => p.Id === patientId);
           </h2>
           <p className="text-slate-600 mt-1">Monitor queues and workflow across departments</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm">
+<div className="flex items-center space-x-2">
+          <Button variant="ghost" size="sm" onClick={loadData}>
             <ApperIcon name="RefreshCw" className="w-4 h-4 mr-2" />
             Refresh
           </Button>
-          <Button variant="primary">
+          <Button variant="primary" onClick={() => {
+            // This would typically open a modal or navigate to a form
+            // For now, we'll use a simple prompt as placeholder
+            const name = prompt("Enter department name:");
+            if (name) {
+              departmentService.create({ Name: name }).then((result) => {
+                if (result) {
+                  loadData(); // Refresh the departments list
+                }
+              });
+            }
+          }}>
+            <ApperIcon name="Plus" className="w-4 h-4 mr-2" />
+            Create Department
+          </Button>
+          <Button variant="secondary">
             <ApperIcon name="Settings" className="w-4 h-4 mr-2" />
             Settings
           </Button>
