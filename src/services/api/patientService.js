@@ -99,10 +99,10 @@ class PatientService {
     }
   }
 
-  async create(patientData) {
+async create(patientData) {
     try {
       // Only include Updateable fields in create operation
-const updateableData = {
+      const updateableData = {
         Name: patientData.Name || '',
         Tags: patientData.Tags || '',
         age_c: parseInt(patientData.age_c) || 0,
